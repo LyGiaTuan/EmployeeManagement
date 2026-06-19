@@ -10,6 +10,7 @@ corsConfig.configureApp(app);
 
 app.use("/user", userRouter);
 
+
 app.listen(5000, () => {
   console.log("service start at http://localhost:5000");
 });

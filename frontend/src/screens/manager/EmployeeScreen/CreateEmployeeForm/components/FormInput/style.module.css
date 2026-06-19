@@ -1,0 +1,27 @@
+.label {
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 17px;
+  margin-bottom: 13px;
+}
+
+.input {
+  width: 423px;
+  height: 72px;
+  border-radius: 8px;
+  border: 1px solid #bcbcbc;
+  background-color: #ffffff;
+  font-size: 25px;
+  padding-left: 20px;
+  box-sizing: border-box;
+}
+
+.inpuContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.prefix {
+  font-size: 25px;
+}

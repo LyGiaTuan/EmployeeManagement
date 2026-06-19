@@ -2,6 +2,7 @@ import styles from "./styles.module.css";
 import PATH from "../../Path";
 import blankAvatarIcon from "../../assets/blankAvatarIcon.svg";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
 const SideMenu = ({ children }) => {
   const location = useLocation();
@@ -21,9 +22,10 @@ const SideMenu = ({ children }) => {
           <div className={styles.brand}></div>
         </div>
         <nav className={styles.menu}>
-          {paths.map((item) => {
+          {paths.map((item, index) => {
             return (
               <a
+                key={index}
                 href={item.pathName}
                 className={`${styles.menuItem} ${location.pathname === item.pathName ? styles.activeMenuItem : ""}`}
                 onClick={(e) => {
@@ -44,6 +46,7 @@ const SideMenu = ({ children }) => {
         </div>
         {children}
       </div>
+      <ToastContainer />
     </div>
   );
 };

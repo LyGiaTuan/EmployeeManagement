@@ -1,19 +1,28 @@
 const smsService = require("./smsService");
 const db = require("../config/firebaseConfig");
 const jwt = require("jsonwebtoken");
+const admin = require("firebase-admin");
+const ROLE = require("../enums/role");
+const crypto = require("crypto");
+const emailService = require("./emailService");
+const passwordUtil = require("../utils/passwordUtil");
+const validateUtil = require("../utils/validateUtil");
+const securityUtil = require("../utils/securityUtil");
 
 const createNewAccessCode = async (body) => {
-  const phoneNumber = `+84${body.phoneNumber}`;
+  let phoneNumber = body.phoneNumber;
+  validateUtil.checkEmpty("Phone number", phoneNumber);
+
   const code = Math.round(Math.random() * 1000000)
     .toString()
     .padStart(6, "0");
 
   await db.runTransaction(async (tx) => {
-    const managersSnapshot = await tx.get(
+    const managerSnapshot = await tx.get(
       db.collection("users").doc(phoneNumber),
     );
 
-    if (managersSnapshot.empty) {
+    if (!managerSnapshot.exists) {
       throw new Error("Manager not found");
     }
 
@@ -21,14 +30,20 @@ const createNewAccessCode = async (body) => {
       code: code,
     });
   });
-  // smsService.sendSMS(phoneNumber, otp);
+
+  smsService.sendSMS(phoneNumber, otp);
   return code;
 };
 
 const validateAccessCode = async (body) => {
   const code = body.code;
-  const phoneNumber = `+84${body.phoneNumber}`;
-  let jwtToken = "";
+  let phoneNumber = body.phoneNumber;
+  validateUtil.checkEmpty("Phone number", phoneNumber);
+  validateUtil.checkEmpty("Code", code);
+
+  phoneNumber = `+84${body.phoneNumber}`;
+  let manager;
+  let token = "";
   await db.runTransaction(async (tx) => {
     const otpRef = db.collection("otps").doc(phoneNumber);
     const otpSnapshot = await tx.get(otpRef);
@@ -41,7 +56,7 @@ const validateAccessCode = async (body) => {
     if (!otp.code) {
       throw new Error("Code doesn't exist");
     }
-    
+
     if (otp.code != code) {
       throw new Error("Code doesn't match");
     }
@@ -49,13 +64,232 @@ const validateAccessCode = async (body) => {
     const managerSnapshot = await tx.get(
       db.collection("users").doc(phoneNumber),
     );
-    const manager = managerSnapshot.data();
+    manager = managerSnapshot.data();
 
     tx.set(db.collection("otps").doc(phoneNumber), { code: "" });
 
-    jwtToken = jwt.sign(manager, process.env.JWT_SECRET);
+    token = securityUtil.generateToken(
+      manager.email,
+      manager.phoneNumber,
+      manager.role,
+    );
   });
-  return jwtToken;
+
+  return { success: true, token: token, name: user.name, role: user.role };
 };
 
-module.exports = { createNewAccessCode, validateAccessCode };
+const createNewEmployee = async (employee) => {
+  validateUtil.validateEmail(employee.email);
+  validateUtil.checkEmpty("Name", name);
+  validateUtil.checkEmpty("Phone number", phoneNumber);
+  validateUtil.checkEmpty("Address", address);
+  employee.phoneNumber = `+84${employee.phoneNumber}`;
+  await db.runTransaction(async (tx) => {
+    const foundPhoneNumberUserQuery = db
+      .collection("users")
+      .where("phoneNumber", "==", employee.phoneNumber)
+      .limit(1);
+
+    const foundEmailUserQuery = db
+      .collection("users")
+      .where("email", "==", employee.email)
+      .limit(1);
+
+    const phoneNumberUserSnapshot = await tx.get(foundPhoneNumberUserQuery);
+    if (!phoneNumberUserSnapshot.empty) {
+      throw new Error("Phone number is already registered");
+    }
+
+    const emailUserSnapshot = await tx.get(foundEmailUserQuery);
+    if (!emailUserSnapshot.empty) {
+      throw new Error("Email is already registered");
+    }
+
+    const usersCountSnapshot = await tx.get(
+      db.collection("employeesCount").doc("primary"),
+    );
+
+    const usersCount = usersCountSnapshot.exists
+      ? usersCountSnapshot.data()
+      : 0;
+
+    employee = {
+      name: employee.name.trim(),
+      email: employee.email.trim(),
+      phoneNumber: employee.phoneNumber.trim(),
+      address: employee.address.trim(),
+      id: crypto.randomUUID(),
+      role: ROLE.EMPLOYEE,
+      activateKey: crypto.randomUUID(),
+      active: false,
+    };
+
+    tx.set(db.collection("users").doc(employee.phoneNumber), employee);
+
+    tx.set(db.collection("employeesCount").doc("primary"), {
+      value: parseInt(usersCount.value) + 1,
+    });
+  });
+
+  emailService.sendMail(
+    employee.email,
+    "Employee Management",
+    "Your account has been created",
+    `Your account username is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}"`,
+  );
+
+  return employee.id;
+};
+
+const getEmployees = async (limit = 10, offset = 0) => {
+  let employees = [];
+  let employeesCount = 0;
+  await db.runTransaction(async (tx) => {
+    const employeesQuery = db
+      .collection("users")
+      .where("role", "==", ROLE.EMPLOYEE)
+      .select("id", "email", "name", "phoneNumber", "address", "active")
+      .limit(limit)
+      .offset(offset);
+
+    const employeesSnapshot = await tx.get(employeesQuery);
+    employeesSnapshot.forEach(
+      (employeeSnapshot) =>
+        (employees = [employeeSnapshot.data(), ...employees]),
+    );
+
+    const employeesCountSnapshot = await tx.get(
+      db.collection("employeesCount").doc("primary"),
+    );
+
+    employeesCount = employeesCountSnapshot.data();
+  });
+  return { employees, employeesCount: employeesCount.value };
+};
+
+const deleteEmployee = async (body) => {
+  const employeeId = body.employeeId;
+  validateUtil.checkEmpty("Employee id", employeeId);
+  await db.runTransaction(async (tx) => {
+    const employeesQuery = db
+      .collection("users")
+      .where("id", "==", employeeId)
+      .limit(1);
+
+    const employeesSnapshot = await tx.get(employeesQuery);
+
+    const usersCountSnapshot = await tx.get(
+      db.collection("employeesCount").doc("primary"),
+    );
+    const usersCount = usersCountSnapshot.data();
+
+    let employee;
+    employeesSnapshot.forEach((employeeSnapshot) => {
+      employee = employeeSnapshot.data();
+    });
+
+    tx.delete(db.collection("users").doc(employee.phoneNumber));
+    tx.set(db.collection("employeesCount").doc("primary"), {
+      value: parseInt(usersCount.value) - 1,
+    });
+  });
+};
+
+const setupAccount = async (body) => {
+  const activateKey = body.activateKey;
+  const username = body.username;
+  const password = body.password;
+
+  validateUtil.validateUsername(username);
+  const hashedPassword = await passwordUtil.hashPassword(password);
+  let employee;
+
+  await db.runTransaction(async (tx) => {
+    const employeesQuery = db
+      .collection("users")
+      .where("activateKey", "==", activateKey)
+      .limit(1);
+
+    const employeesSnapshot = await tx.get(employeesQuery);
+
+    if (employeesSnapshot.empty) {
+      throw new Error("Account doesn't exist");
+    }
+
+    employeesSnapshot.forEach((employeeSnapshot) => {
+      employee = employeeSnapshot.data();
+    });
+
+    if (employee.active) {
+      throw new Error("Account is already active");
+    }
+
+    if (activateKey !== employee.activateKey) {
+      throw new Error("Activate key isn't match");
+    }
+
+    const foundEmployeesQuery = db
+      .collection("users")
+      .where("username", "==", username)
+      .limit(1);
+
+    const foundEmployeesSnapshot = await tx.get(foundEmployeesQuery);
+
+    if (!employeesSnapshot.empty) {
+      throw new Error("Username is already registered");
+    }
+
+    employee.username = username;
+    employee.password = hashedPassword;
+    employee.active = true;
+
+    tx.set(db.collection("users").doc(employee.phoneNumber), employee);
+  });
+
+  return { employeeId: employee.id, success: true };
+};
+
+const loginByUsernamePassword = async (body) => {
+  const username = body.username;
+  const password = body.password;
+  validateUtil.checkEmpty(username);
+  validateUtil.checkEmpty(password);
+  let token = "";
+  let user;
+
+  await db.runTransaction(async (tx) => {
+    const usersQuery = db
+      .collection("users")
+      .where("username", "==", username)
+      .limit(1);
+
+    const usersSnapshot = await tx.get(usersQuery);
+
+    if (usersSnapshot.empty) {
+      throw new Error("Username is not found");
+    }
+
+    usersSnapshot.forEach((userSnapshot) => {
+      user = userSnapshot.data();
+    });
+
+    passwordUtil.comparePassword(password, user.password);
+    token = securityUtil.generateToken(
+      manager.email,
+      manager.phoneNumber,
+      manager.role,
+    );
+  });
+
+  return { success: true, token: token, name: user.name, role: user.role };
+};
+
+module.exports = {
+  createNewAccessCode,
+  validateAccessCode,
+  createNewEmployee,
+  getEmployees,
+  deleteEmployee,
+  setupAccount,
+  loginByUsernamePassword,
+};

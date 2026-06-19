@@ -11,6 +11,25 @@
   padding-left: 49px;
 }
 
+.status {
+  height: 28px;
+  font-weight: 400;
+  line-height: 17px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.active {
+  background-color: #e3fef3;
+  color: #16d583;
+}
+
+.inactive {
+  background-color: #fdecec;
+  color: #dc2626;
+}
+
 .employeeTableContainer {
   box-shadow:
     0px 0px 1px 0px #171a1f12,
@@ -102,17 +121,6 @@
   border: 1px solid #f1f1f1;
 }
 
-.status {
-  height: 28px;
-  background-color: #e3fef3;
-  font-weight: 400;
-  line-height: 17px;
-  color: #16d583;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .buttons {
   display: flex;
   justify-content: center;
@@ -139,4 +147,23 @@
 
 .deleteButton {
   background-color: #ea5656;
+  width: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.disabledEditButton {
+  background-color: lightblue;
+}
+
+.disabledDeleteButton {
+  background-color: pink;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }

@@ -1,0 +1,59 @@
+.container {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  width: 1079px;
+  height: 782px;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 17px;
+  color: #000000;
+  margin-top: 69px;
+}
+
+.inputsContainer {
+  display: grid;
+  grid-template-columns: 423px 423px;
+  margin: 0 auto;
+  gap: 30px;
+  width: 876px;
+  margin-top: 73px;
+}
+
+.createButton {
+  width: 218px;
+  height: 50px;
+  border-radius: 3px;
+  background-color: #2c7be5;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 17px;
+  color: #ffffff;
+  border: 0;
+  margin-top: 98px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: end;
+  padding-right: 113px;
+}

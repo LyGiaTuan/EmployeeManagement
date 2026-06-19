@@ -6,17 +6,15 @@ import { Oval } from "react-loader-spinner";
 const AppLoginForm = ({
   title,
   subTitle,
-  type,
-  placeHolder,
+  fields,
   note,
   optionLabel,
   optionHandle,
   optionLinkLabel,
   handleSubmit,
   buttonTitle,
-  prefix,
 }) => {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState({});
   const [loading, setLoading] = useState();
   const navigateToLink = (e) => {
     e.preventDefault();
@@ -37,19 +35,24 @@ const AppLoginForm = ({
       </div>
       <h2 className={styles.title}>{title}</h2>
       <div className={styles.subTitle}>{subTitle}</div>
-      <div className={styles.valueInputContainer}>
-        {prefix && <div>{prefix}</div>}
-        <input
-          className={styles.valueInput}
-          type={type}
-          value={value}
-          required
-          onChange={(e) => {
-            setValue(e.target.value);
-          }}
-          placeholder={placeHolder}
-        />
-      </div>
+      {fields.map((field, index) => {
+        return (
+          <div key={index} className={styles.valueInputContainer}>
+            {field.prefix && <div>{field.prefix}</div>}
+            <input
+              className={styles.valueInput}
+              type={field.type}
+              value={value[field.key]}
+              required
+              onChange={(e) => {
+                setValue({ ...value, [field.key]: e.target.value });
+              }}
+              placeholder={field.placeHolder}
+            />
+          </div>
+        );
+      })}
+
       <button
         className={`${styles.submitButton} ${loading && styles.disabledSubmitButton}`}
         disabled={loading}

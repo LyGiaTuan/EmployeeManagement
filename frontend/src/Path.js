@@ -7,5 +7,9 @@ const PATH = {
     TASK: "/manager/dashboard/task",
     MESSAGE: "/manager/dashboard/message",
   },
+  EMPLOYEE: {
+    SECURE_ACCOUNT_SETUP: "/employee/secure-account-setup",
+    LOGIN: "/employee/login",
+  },
 };
 export default PATH;
