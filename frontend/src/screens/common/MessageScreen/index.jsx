@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import blankAvatarIcon from "../../../assets/blankAvatarIcon.svg";
 import ChatGroupsContext from "../../../contexts/ChatGroupsContext";
 import SocketContext from "../../../contexts/SocketContext";
+import { ROLE } from "../../../utils/RoleEnum";
 import Conversion from "../../common/MessageScreen/components/Conversation";
 import ChatBox from "./components/ChatBox";
 import styles from "./styles.module.css";
-import { ROLE } from "../../../utils/RoleEnum";
 
 const MessageScreen = () => {
   const chatGroups = useContext(ChatGroupsContext);
@@ -43,8 +43,8 @@ const MessageScreen = () => {
 
     const handleServerSendMessage = (message) => {
       if (
-        message?.employeeId === isSelected ||
-        message?.managerId === isSelected
+        (user?.role === ROLE.EMPLOYEE && message?.managerId === isSelected) ||
+        (user?.role === ROLE.MANAGER && message?.employeeId === isSelected)
       ) {
         setMessages([...messages, message]);
       }
@@ -54,7 +54,7 @@ const MessageScreen = () => {
       socketClient.off("server_send_messages", handleServerSendMessages);
       socketClient.off("server_send_message", handleServerSendMessage);
     };
-  }, [socketClient, messages]);
+  }, [socketClient, messages, isSelected, user?.role]);
 
   return (
     <div className={styles.container}>

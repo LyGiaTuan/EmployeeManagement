@@ -15,9 +15,6 @@ const SocketProvider = ({ children }) => {
     if (token) {
       socketClient.auth = { token: token };
       socketClient.connect();
-      return () => {
-        socketClient.disconnect();
-      };
     }
   }, []);
 

@@ -39,14 +39,11 @@ const ChatGroupsProvider = ({ children }) => {
       foundChatGroup.lastMessage = message.content;
       foundChatGroup.isEmployeeSender = message.isEmployeeSender;
 
-      if (message.employeeId !== chatGroups[0].employeeId) {
-        setChatGroups(
-          chatGroups.sort(
-            (chatGroup1, chatGroup2) =>
-              chatGroup2.workTime - chatGroup1.workTime,
-          ),
-        );
-      }
+      setChatGroups([
+        ...chatGroups.sort(
+          (chatGroup1, chatGroup2) => chatGroup2.workTime - chatGroup1.workTime,
+        ),
+      ]);
     };
     socketClient.on("server_send_message", handleServerSendMessage);
 
