@@ -13,8 +13,8 @@ const createNewAccessCode = async (req, res) => {
 const validateAccessCode = async (req, res) => {
   try {
     const body = req.body;
-    jwtToken = await userService.validateAccessCode(body);
-    res.json({ success: true, token: jwtToken });
+    data = await userService.validateAccessCode(body);
+    res.json(data);
   } catch (ex) {
     res.status(400).json({ error: ex.message });
   }
@@ -23,8 +23,9 @@ const validateAccessCode = async (req, res) => {
 const createNewEmployee = async (req, res) => {
   try {
     const body = req.body;
-    const employeeId = await userService.createNewEmployee(body);
-    res.json({ success: true, employeeId });
+    const user = req.user;
+    const data = await userService.createNewEmployee(body, user);
+    res.json(data);
   } catch (ex) {
     res.status(400).json({ error: ex.message });
   }
@@ -43,7 +44,8 @@ const getEmployees = async (req, res) => {
 const deleteEmployee = async (req, res) => {
   try {
     const body = req.body;
-    data = await userService.deleteEmployee(body);
+    const user = req.user;
+    data = await userService.deleteEmployee(body, user);
     res.json({ success: true });
   } catch (ex) {
     res.status(400).json({ error: ex.message });
@@ -60,10 +62,11 @@ const setupAccount = async (req, res) => {
   }
 };
 
-const loginByEmployee = async (req, res) => {
+const loginByUsernamePassword = async (req, res) => {
   try {
     const body = req.body;
     data = await userService.loginByUsernamePassword(body);
+    res.json(data);
   } catch (ex) {
     res.status(400).json({ error: ex.message });
   }
@@ -76,4 +79,5 @@ module.exports = {
   getEmployees,
   deleteEmployee,
   setupAccount,
+  loginByUsernamePassword,
 };

@@ -1,10 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import styles from "./styles.module.css";
 import AppLoginForm from "../../../components/AppLoginForm";
-import { endpoint, getApiUtil, setLocalStorage } from "../../../utils/ApiUtil";
 import PATH from "../../../Path";
+import { endpoint, getApiUtil, setToken } from "../../../utils/ApiUtil";
+import styles from "./styles.module.css";
+import { useContext } from "react";
+import SocketContext from "../../../contexts/SocketContext";
 
 const EmployeeLoginScreen = () => {
+  const navigate = useNavigate();
+  const socketClient = useContext(SocketContext);
   const fields = [
     {
       type: "text",
@@ -20,14 +25,12 @@ const EmployeeLoginScreen = () => {
 
   const handleSubmit = async (data) => {
     try {
-      const res = await getApiUtil().post(endpoint.EMPLOYEE.LOGIN, { data });
-      setLocalStorage(
-        res.data.token,
-        phoneNumber,
-        res.data.name,
-        res.data.role,
-      );
-      navigate(PATH.MANAGER.EMPLOYEEE);
+      const res = await getApiUtil().post(endpoint.EMPLOYEE.LOGIN, data);
+      setToken(res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      socketClient.auth = { token: res.data.token };
+      socketClient.connect();
+      navigate(PATH.EMPLOYEE.TASK);
     } catch (ex) {
       toast.error(`Error: ${ex?.response?.data.error}`);
     }
@@ -38,7 +41,7 @@ const EmployeeLoginScreen = () => {
         fields={fields}
         title={"Sign In"}
         buttonTitle={"Next"}
-        handleSubmit={() => {}}
+        handleSubmit={handleSubmit}
         subTitle={"Please enter your username and password to sign in"}
       />
       <ToastContainer />

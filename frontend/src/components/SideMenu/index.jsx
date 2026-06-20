@@ -1,20 +1,43 @@
-import styles from "./styles.module.css";
-import PATH from "../../Path";
-import blankAvatarIcon from "../../assets/blankAvatarIcon.svg";
+import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import PATH from "../../Path";
+import blankAvatarIcon from "../../assets/blankAvatarIcon.svg";
+import SocketContext from "../../contexts/SocketContext";
+import { clearToken } from "../../utils/ApiUtil";
+import { ROLE } from "../../utils/RoleEnum";
+import AppImage from "../AppImage";
+import styles from "./styles.module.css";
 
 const SideMenu = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
   const navigateToLink = (link) => {
     navigate(link);
   };
-  const paths = [
-    { pathName: PATH.MANAGER.EMPLOYEEE, tabName: "Manage Employee" },
-    { pathName: PATH.MANAGER.TASK, tabName: "Manage Task" },
-    { pathName: PATH.MANAGER.MESSAGE, tabName: "Message" },
-  ];
+  const socketClient = useContext(SocketContext);
+  const paths =
+    user?.role === ROLE.MANAGER
+      ? [
+          { pathName: PATH.MANAGER.EMPLOYEEE, tabName: "Manage Employee" },
+          { pathName: PATH.MANAGER.TASK, tabName: "Manage Task" },
+          { pathName: PATH.COMMON.MESSAGE, tabName: "Message" },
+        ]
+      : [
+          { pathName: PATH.EMPLOYEE.TASK, tabName: "Manage Task" },
+          { pathName: PATH.COMMON.MESSAGE, tabName: "Message" },
+        ];
+
+  const logout = (e) => {
+    e.preventDefault();
+    localStorage.clear();
+    clearToken();
+    socketClient.auth = { token: "" };
+    socketClient.disconnect();
+    navigate(PATH.EMPLOYEE.LOGIN);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.menuContainer}>
@@ -42,9 +65,19 @@ const SideMenu = ({ children }) => {
       <div className={styles.rightContainer}>
         <div className={styles.header}>
           <div className={styles.bell}>bell</div>
-          <img src={blankAvatarIcon} className={styles.avatar} alt="avatar" />
+          <div className={styles.avatarContainer}>
+            <AppImage src={blankAvatarIcon} />
+            <div className={styles.infoCard}>
+              <div>Name: {user?.name}</div>
+              <div>Email: {user?.email}</div>
+              <div>Phone number: {user?.phoneNumber}</div>
+              <a href={"/"} onClick={logout} className={styles.logoutButton}>
+                Logout
+              </a>
+            </div>
+          </div>
         </div>
-        {children}
+        <div className={styles.contentContainer}>{children}</div>
       </div>
       <ToastContainer />
     </div>

@@ -19,7 +19,8 @@ let apiUtil = axios.create({
   baseURL: baseUrl,
 });
 
-const setToken = (token) => {
+export const setToken = (token) => {
+  localStorage.setItem("token", token);
   apiUtil = axios.create({
     baseURL: baseUrl,
     headers: {
@@ -28,21 +29,18 @@ const setToken = (token) => {
   });
 };
 
-export const setLocalStorage = (token, phoneNumber, name, role) => {
-  localStorage.setItem("token", token);
-  localStorage.setItem("phoneNumber", phoneNumber);
-  localStorage.setItem("email", email);
-  localStorage.setItem("role", role);
-  setToken(token);
-};
-
-export const getLocalStorage = () => {
+export const loadToken = () => {
   const token = localStorage.getItem("token");
   if (token) {
     setToken(token);
-    return true;
   }
-  return false;
+};
+
+export const clearToken = () => {
+  localStorage.removeItem("token");
+  apiUtil = axios.create({
+    baseURL: baseUrl,
+  });
 };
 
 export const getApiUtil = () => {

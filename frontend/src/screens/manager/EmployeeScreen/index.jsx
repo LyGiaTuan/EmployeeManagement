@@ -155,7 +155,8 @@ const EmployeeScreen = () => {
                               item.handleClick(employee);
                             }}
                           >
-                            {rowLoading.action === item.action ? (
+                            {rowLoading.action === item.action &&
+                            employee.id === rowLoading.employeeId ? (
                               <Oval width={20} height={20} color="black" />
                             ) : (
                               item.title

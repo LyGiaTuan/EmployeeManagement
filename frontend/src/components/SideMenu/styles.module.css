@@ -57,12 +57,38 @@
   padding-right: 97px;
 }
 
-.avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 100%;
-}
-
 .bell {
   margin-right: 42px;
+}
+
+.avatarContainer {
+  position: relative;
+}
+
+.avatarContainer:hover > .infoCard {
+  display: flex;
+}
+
+.infoCard {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid gray;
+  border-radius: 4px;
+  position: absolute;
+  right: 0;
+  width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+.logoutButton {
+  color: red;
+  text-decoration: none;
+  border-top: 1px solid gray;
+  padding-top: 10px;
+}
+
+.contentContainer {
+  height: calc(100% - 135px);
 }

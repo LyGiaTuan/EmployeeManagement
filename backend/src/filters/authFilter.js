@@ -24,6 +24,8 @@ const managerFilter = (req, res, next) => {
     return;
   }
 
+  req.user = tokenData;
+
   next();
 };
 

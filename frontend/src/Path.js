@@ -5,11 +5,14 @@ const PATH = {
     REGISTER: "/manager/register",
     EMPLOYEEE: "/manager/dashboard/employee",
     TASK: "/manager/dashboard/task",
-    MESSAGE: "/manager/dashboard/message",
   },
   EMPLOYEE: {
     SECURE_ACCOUNT_SETUP: "/employee/secure-account-setup",
     LOGIN: "/employee/login",
+    TASK: "/employee/dashboard/task",
+  },
+  COMMON: {
+    MESSAGE: "/message/dashboard",
   },
 };
 export default PATH;

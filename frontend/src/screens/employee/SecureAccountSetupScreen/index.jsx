@@ -10,7 +10,7 @@ const SecureAccountSetupScreen = () => {
   const navigate = useNavigate();
   const handleSubmit = async (data) => {
     try {
-      if (data.password != data.reenterPassword) {
+      if (data.password !== data.reenterPassword) {
         toast.error(`Error: Passwords do not match`);
         return;
       }

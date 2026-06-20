@@ -8,10 +8,12 @@ const emailService = require("./emailService");
 const passwordUtil = require("../utils/passwordUtil");
 const validateUtil = require("../utils/validateUtil");
 const securityUtil = require("../utils/securityUtil");
+const { getIo, userMap } = require("../config/socketConfig");
 
 const createNewAccessCode = async (body) => {
   let phoneNumber = body.phoneNumber;
   validateUtil.checkEmpty("Phone number", phoneNumber);
+  phoneNumber = `+84${phoneNumber}`;
 
   const code = Math.round(Math.random() * 1000000)
     .toString()
@@ -31,7 +33,7 @@ const createNewAccessCode = async (body) => {
     });
   });
 
-  smsService.sendSMS(phoneNumber, otp);
+  // smsService.sendSMS(phoneNumber, code);
   return code;
 };
 
@@ -69,21 +71,33 @@ const validateAccessCode = async (body) => {
     tx.set(db.collection("otps").doc(phoneNumber), { code: "" });
 
     token = securityUtil.generateToken(
+      manager.id,
       manager.email,
       manager.phoneNumber,
       manager.role,
+      manager.name,
     );
   });
 
-  return { success: true, token: token, name: user.name, role: user.role };
+  return {
+    id: manager.id,
+    success: true,
+    email: manager.email,
+    phoneNumber: manager.phoneNumber,
+    token: token,
+    name: manager.name,
+    role: manager.role,
+  };
 };
 
-const createNewEmployee = async (employee) => {
+const createNewEmployee = async (employee, manager) => {
   validateUtil.validateEmail(employee.email);
-  validateUtil.checkEmpty("Name", name);
-  validateUtil.checkEmpty("Phone number", phoneNumber);
-  validateUtil.checkEmpty("Address", address);
+  validateUtil.checkEmpty("Name", employee.name);
+  validateUtil.checkEmpty("Phone number", employee.phoneNumber);
+  validateUtil.checkEmpty("Address", employee.address);
+
   employee.phoneNumber = `+84${employee.phoneNumber}`;
+  let chatGroup;
   await db.runTransaction(async (tx) => {
     const foundPhoneNumberUserQuery = db
       .collection("users")
@@ -115,7 +129,7 @@ const createNewEmployee = async (employee) => {
 
     employee = {
       name: employee.name.trim(),
-      email: employee.email.trim(),
+      email: employee.email,
       phoneNumber: employee.phoneNumber.trim(),
       address: employee.address.trim(),
       id: crypto.randomUUID(),
@@ -129,7 +143,21 @@ const createNewEmployee = async (employee) => {
     tx.set(db.collection("employeesCount").doc("primary"), {
       value: parseInt(usersCount.value) + 1,
     });
+
+    chatGroup = {
+      employeeId: employee.id,
+      lastMessage: "",
+      workTime: new Date().valueOf(),
+      isEmployeeSender: false,
+      employeeName: employee.name,
+      managerName: manager.name,
+      managerId: manager.id,
+    };
+
+    tx.set(db.collection("chatGroups").doc(employee.id), chatGroup);
   });
+
+  getIo().to(userMap.get(manager.id)).emit("server_send_group", chatGroup);
 
   emailService.sendMail(
     employee.email,
@@ -138,7 +166,7 @@ const createNewEmployee = async (employee) => {
     `Your account username is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}"`,
   );
 
-  return employee.id;
+  return { success: true, employeeId: employee.id };
 };
 
 const getEmployees = async (limit = 10, offset = 0) => {
@@ -167,7 +195,7 @@ const getEmployees = async (limit = 10, offset = 0) => {
   return { employees, employeesCount: employeesCount.value };
 };
 
-const deleteEmployee = async (body) => {
+const deleteEmployee = async (body, user) => {
   const employeeId = body.employeeId;
   validateUtil.checkEmpty("Employee id", employeeId);
   await db.runTransaction(async (tx) => {
@@ -188,11 +216,22 @@ const deleteEmployee = async (body) => {
       employee = employeeSnapshot.data();
     });
 
+    const messagesSnapshot = await tx.get(
+      db.collection("messages").where("employeeId", "==", employee.id),
+    );
+
+    tx.delete(db.collection("chatGroups").doc(employee.id));
     tx.delete(db.collection("users").doc(employee.phoneNumber));
+    messagesSnapshot.forEach((messageSnapshot) => {
+      tx.delete(messageSnapshot.ref);
+    });
+
     tx.set(db.collection("employeesCount").doc("primary"), {
       value: parseInt(usersCount.value) - 1,
     });
   });
+
+  getIo().to(userMap.get(user.id)).emit("server_delete_group", employeeId);
 };
 
 const setupAccount = async (body) => {
@@ -235,7 +274,7 @@ const setupAccount = async (body) => {
 
     const foundEmployeesSnapshot = await tx.get(foundEmployeesQuery);
 
-    if (!employeesSnapshot.empty) {
+    if (!foundEmployeesSnapshot.empty) {
       throw new Error("Username is already registered");
     }
 
@@ -252,8 +291,8 @@ const setupAccount = async (body) => {
 const loginByUsernamePassword = async (body) => {
   const username = body.username;
   const password = body.password;
-  validateUtil.checkEmpty(username);
-  validateUtil.checkEmpty(password);
+  validateUtil.checkEmpty("Username", username);
+  validateUtil.checkEmpty("Password", password);
   let token = "";
   let user;
 
@@ -266,22 +305,36 @@ const loginByUsernamePassword = async (body) => {
     const usersSnapshot = await tx.get(usersQuery);
 
     if (usersSnapshot.empty) {
-      throw new Error("Username is not found");
+      throw new Error("Username or Password is wrong");
     }
 
     usersSnapshot.forEach((userSnapshot) => {
       user = userSnapshot.data();
     });
 
-    passwordUtil.comparePassword(password, user.password);
+    try {
+      passwordUtil.comparePassword(password, user.password);
+    } catch {
+      throw new Error("Username or Password is wrong");
+    }
     token = securityUtil.generateToken(
-      manager.email,
-      manager.phoneNumber,
-      manager.role,
+      user.id,
+      user.email,
+      user.phoneNumber,
+      user.role,
+      user.name,
     );
   });
 
-  return { success: true, token: token, name: user.name, role: user.role };
+  return {
+    id: user.id,
+    success: true,
+    email: user.email,
+    token: token,
+    phoneNumber: user.phoneNumber,
+    name: user.name,
+    role: user.role,
+  };
 };
 
 module.exports = {

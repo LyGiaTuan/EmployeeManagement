@@ -30,6 +30,6 @@ userRouter.post(
 );
 
 userRouter.post("/employee/setup-account", userController.setupAccount);
-userRouter.post("/employee/login",userController.loginByEmployee)
+userRouter.post("/employee/login", userController.loginByUsernamePassword);
 
 module.exports = userRouter;
