@@ -94,33 +94,6 @@
   border: 0;
 }
 
-.employeeTableHeader {
-  background: #fafafa;
-  height: 44px;
-  box-shadow:
-    0px 0px 1px 0px #171a1f12,
-    0px 0px 2px 0px #171a1f1f;
-}
-
-.employeeTableHeader > th {
-  color: #171a1f;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 22px;
-  width: 25%;
-}
-
-.employeeTable {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.employeeTableRow {
-  height: 71px;
-  text-align: center;
-  border: 1px solid #f1f1f1;
-}
-
 .buttons {
   display: flex;
   justify-content: center;
@@ -169,5 +142,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  padding: 20px;
+}
+
+.navigationButtonsContainer {
+  display: flex;
+  padding: 20px;
+  justify-content: center;
+  gap: 20px;
+}
+
+.navigationButton {
+  font-size: 20px;
+  background-color: #2c7be5;
 }

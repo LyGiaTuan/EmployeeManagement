@@ -4,7 +4,6 @@ import SocketContext from "../contexts/SocketContext";
 
 const ChatGroupsProvider = ({ children }) => {
   const socketClient = useContext(SocketContext);
-  const user = localStorage.getItem("user");
 
   const [chatGroups, setChatGroups] = useState([]);
   useEffect(() => {

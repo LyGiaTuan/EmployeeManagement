@@ -4,14 +4,15 @@ import SideMenu from "./components/SideMenu";
 import PATH from "./Path";
 import ChatGroupsProvider from "./providers/ChatGroupsProvider";
 import SocketProvider from "./providers/SocketProvider";
+import EditProfileScreen from "./screens/common/EditProfileScreen";
 import MessageScreen from "./screens/common/MessageScreen";
 import EmployeeLoginScreen from "./screens/employee/EmployeeLoginScreen";
 import SecureAccountSetupScreen from "./screens/employee/SecureAccountSetupScreen";
 import EmployeeScreen from "./screens/manager/EmployeeScreen";
 import LoginScreen from "./screens/manager/LoginScreen";
-import TaskScreen from "./screens/manager/TaskScreen";
 import ValidateScreen from "./screens/manager/ValidateScreen";
 import { loadToken } from "./utils/ApiUtil";
+import TaskScreen from "./screens/common/TaskScreen";
 
 function App() {
   loadToken();
@@ -39,10 +40,12 @@ function App() {
                 path={PATH.MANAGER.EMPLOYEEE}
                 element={<EmployeeScreen />}
               />
-              <Route path={PATH.MANAGER.TASK} element={<TaskScreen />} />
-
-              <Route path={PATH.EMPLOYEE.TASK} element={<TaskScreen />} />
               <Route path={PATH.COMMON.MESSAGE} element={<MessageScreen />} />
+              <Route
+                path={PATH.COMMON.EDIT_PROFILE}
+                element={<EditProfileScreen />}
+              />
+              <Route path={PATH.COMMON.TASK} element={<TaskScreen />} />
             </Route>
             <Route
               path={PATH.EMPLOYEE.LOGIN}

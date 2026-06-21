@@ -1,10 +1,11 @@
 import styles from "./styles.module.css";
 import magnifyingGlassIcon from "../../../assets/magnifyingGlassIcon.svg";
 import CreateEmployeeForm from "./CreateEmployeeForm";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { endpoint, getApiUtil } from "../../../utils/ApiUtil";
 import { toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
+import AppTable from "../../../components/AppTable";
 
 const ACTION = {
   DELETE: "DELETE",
@@ -21,13 +22,15 @@ const EmployeeScreen = () => {
   const [employee, setEmployee] = useState();
   const employeesCount = useRef(0);
   const [loading, setLoading] = useState(true);
+  const [emailKeyword, setEmailKeyword] = useState("");
   const [rowLoading, setRowLoading] = useState({});
-  const getEmployees = async () => {
+  const [offset, setOffset] = useState(0);
+  const getEmployees = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getApiUtil().post(endpoint.MANAGER.GET_EMPLOYEES, {
-        limit: 10,
-        offset: 0,
+        offset: offset,
+        emailKeyword,
       });
       employeesCount.current = res.data.employeesCount;
       setEmployees(res.data.employees);
@@ -36,7 +39,7 @@ const EmployeeScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [emailKeyword, offset]);
 
   const deleteEmployee = async (currentEmployee) => {
     try {
@@ -81,16 +84,56 @@ const EmployeeScreen = () => {
   ];
 
   useEffect(() => {
-    getEmployees();
-  }, []);
+    const callApiId = setTimeout(() => {
+      getEmployees();
+    }, 400);
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <Oval width={30} height={30} color="black" />
+    return () => {
+      clearTimeout(callApiId);
+    };
+  }, [getEmployees]);
+
+  useEffect(() => {
+    setLoading(true);
+  }, [offset]);
+
+  const labels = ["Employee Name", "Email", "Phone Number", "Action"];
+  const keys = ["name", "email", "active", "buttons"];
+  const lists = employees.map((employee) => ({
+    id: employee.id,
+    name: employee.name,
+    email: employee.email,
+    active: (
+      <div
+        className={`${styles.status} ${employee.active ? styles.active : styles.inactive}`}
+      >
+        {employee.active ? "Active" : "Inactive"}
       </div>
-    );
-  }
+    ),
+    buttons: (
+      <div className={styles.buttons}>
+        {buttons.map((item, index) => {
+          return (
+            <button
+              key={index}
+              className={`${styles.baseButton} ${employee.id === rowLoading.employeeId ? item.buttonDisabledStyle : item.buttonStyle}`}
+              disabled={employee.id === rowLoading.employeeId}
+              onClick={() => {
+                item.handleClick(employee);
+              }}
+            >
+              {rowLoading.action === item.action &&
+              employee.id === rowLoading.employeeId ? (
+                <Oval width={20} height={20} color="black" />
+              ) : (
+                item.title
+              )}
+            </button>
+          );
+        })}
+      </div>
+    ),
+  }));
 
   return (
     <>
@@ -117,60 +160,44 @@ const EmployeeScreen = () => {
                 src={magnifyingGlassIcon}
                 alt={"magnifyingGlassIcon"}
               />
-              <input className={styles.searchInput} />
+              <input
+                className={styles.searchInput}
+                onChange={(e) => {
+                  setEmailKeyword(e.target.value);
+                }}
+              />
             </div>
           </div>
         </div>
-        <table className={styles.employeeTable}>
-          <thead>
-            <tr className={styles.employeeTableHeader}>
-              <th>Employee Name</th>
-              <th>Email</th>
-              <th>Phone Number</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map((employee) => {
-              return (
-                <tr key={employee.id} className={styles.employeeTableRow}>
-                  <td>{employee.name}</td>
-                  <td>{employee.email}</td>
-                  <td>
-                    <div
-                      className={`${styles.status} ${employee.active ? styles.active : styles.inactive}`}
-                    >
-                      {employee.active ? "Active" : "Inactive"}
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.buttons}>
-                      {buttons.map((item, index) => {
-                        return (
-                          <button
-                            key={index}
-                            className={`${styles.baseButton} ${employee.id === rowLoading.employeeId ? item.buttonDisabledStyle : item.buttonStyle}`}
-                            disabled={employee.id === rowLoading.employeeId}
-                            onClick={() => {
-                              item.handleClick(employee);
-                            }}
-                          >
-                            {rowLoading.action === item.action &&
-                            employee.id === rowLoading.employeeId ? (
-                              <Oval width={20} height={20} color="black" />
-                            ) : (
-                              item.title
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <Oval width={30} height={30} color="black" />
+          </div>
+        ) : (
+          <>
+            <AppTable labels={labels} keys={keys} list={lists} />
+            <div className={styles.navigationButtonsContainer}>
+              <button
+                className={`${styles.baseButton} ${styles.navigationButton}`}
+                disabled={!offset}
+                onClick={() => {
+                  setOffset(offset - 10);
+                }}
+              >
+                &larr;
+              </button>
+              <button
+                className={`${styles.baseButton} ${styles.navigationButton}`}
+                disabled={!employees.length}
+                onClick={() => {
+                  setOffset(offset + 10);
+                }}
+              >
+                &rarr;
+              </button>
+            </div>
+          </>
+        )}
       </div>
       <CreateEmployeeForm employee={employee} setEmployee={setEmployee} />
     </>

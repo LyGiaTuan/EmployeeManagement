@@ -18,6 +18,12 @@ userRouter.post(
 );
 
 userRouter.post(
+  "/manager/employee/update",
+  authFilter.managerFilter,
+  userController.updateEmployee,
+);
+
+userRouter.post(
   "/manager/employee/get-list",
   authFilter.managerFilter,
   userController.getEmployees,
@@ -27,6 +33,12 @@ userRouter.post(
   "/manager/employee/delete",
   authFilter.managerFilter,
   userController.deleteEmployee,
+);
+
+userRouter.post(
+  "/profile",
+  authFilter.authenticatedFilter,
+  userController.updateProfile,
 );
 
 userRouter.post("/employee/setup-account", userController.setupAccount);

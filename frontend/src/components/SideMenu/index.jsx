@@ -17,18 +17,14 @@ const SideMenu = ({ children }) => {
     navigate(link);
   };
   const socketClient = useContext(SocketContext);
-  const paths =
-    user?.role === ROLE.MANAGER
-      ? [
-          { pathName: PATH.MANAGER.EMPLOYEEE, tabName: "Manage Employee" },
-          { pathName: PATH.MANAGER.TASK, tabName: "Manage Task" },
-          { pathName: PATH.COMMON.MESSAGE, tabName: "Message" },
-        ]
-      : [
-          { pathName: PATH.EMPLOYEE.TASK, tabName: "Manage Task" },
-          { pathName: PATH.COMMON.MESSAGE, tabName: "Message" },
-        ];
-
+  const paths = [
+    ...(user?.role === ROLE.MANAGER
+      ? [{ pathName: PATH.MANAGER.EMPLOYEEE, tabName: "Manage Employee" }]
+      : []),
+    { pathName: PATH.COMMON.TASK, tabName: "Manage Task" },
+    { pathName: PATH.COMMON.MESSAGE, tabName: "Message" },
+    { pathName: PATH.COMMON.EDIT_PROFILE, tabName: "Edit profile" },
+  ];
   const logout = (e) => {
     e.preventDefault();
     localStorage.clear();

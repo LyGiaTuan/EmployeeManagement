@@ -1,0 +1,24 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background: #fafafa;
+  height: 44px;
+  box-shadow:
+    0px 0px 1px 0px #171a1f12,
+    0px 0px 2px 0px #171a1f1f;
+}
+
+.tableHeader > th {
+  color: #171a1f;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+}
+.tableRow {
+  height: 71px;
+  text-align: center;
+  border: 1px solid #f1f1f1;
+}

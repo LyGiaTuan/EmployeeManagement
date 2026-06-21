@@ -7,10 +7,18 @@ export const endpoint = {
     CREATE_EMPLOYEE: "/user/manager/employee",
     GET_EMPLOYEES: "/user/manager/employee/get-list",
     DELETE_EMPLOYEE: "/user/manager/employee/delete",
+    UPDATE_EMPLOYEE: "/user/manager/employee/update",
   },
   EMPLOYEE: {
     SETUP_ACCOUNT: "/user/employee/setup-account",
     LOGIN: "/user/employee/login",
+  },
+  COMMON: {
+    UPDATE_PROFILE: "/user/profile",
+  },
+  TASK: {
+    GET_TASKS: "/task/get",
+    CREATE_TASK: "/task",
   },
 };
 

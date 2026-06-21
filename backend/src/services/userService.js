@@ -79,14 +79,13 @@ const validateAccessCode = async (body) => {
     );
   });
 
+  delete manager.password;
+  delete manager.activateKey;
+
   return {
-    id: manager.id,
     success: true,
-    email: manager.email,
-    phoneNumber: manager.phoneNumber,
     token: token,
-    name: manager.name,
-    role: manager.role,
+    ...manager,
   };
 };
 
@@ -169,15 +168,21 @@ const createNewEmployee = async (employee, manager) => {
   return { success: true, employeeId: employee.id };
 };
 
-const getEmployees = async (limit = 10, offset = 0) => {
+const getEmployees = async (offset = 0, emailKeyword) => {
   let employees = [];
   let employeesCount = 0;
   await db.runTransaction(async (tx) => {
-    const employeesQuery = db
+    let employeesQuery = db
       .collection("users")
-      .where("role", "==", ROLE.EMPLOYEE)
+      .where("role", "==", ROLE.EMPLOYEE);
+
+    if (emailKeyword) {
+      employeesQuery = employeesQuery.where("email", "==", emailKeyword);
+    }
+
+    employeesQuery = employeesQuery
       .select("id", "email", "name", "phoneNumber", "address", "active")
-      .limit(limit)
+      .limit(10)
       .offset(offset);
 
     const employeesSnapshot = await tx.get(employeesQuery);
@@ -312,11 +317,11 @@ const loginByUsernamePassword = async (body) => {
       user = userSnapshot.data();
     });
 
-    try {
-      passwordUtil.comparePassword(password, user.password);
-    } catch {
+    const result = await passwordUtil.comparePassword(password, user.password);
+    if (!result) {
       throw new Error("Username or Password is wrong");
     }
+
     token = securityUtil.generateToken(
       user.id,
       user.email,
@@ -326,15 +331,115 @@ const loginByUsernamePassword = async (body) => {
     );
   });
 
+  delete user.password;
+  delete user.activateKey;
+
   return {
-    id: user.id,
     success: true,
-    email: user.email,
     token: token,
-    phoneNumber: user.phoneNumber,
-    name: user.name,
-    role: user.role,
+    ...user,
   };
+};
+
+const updateEmployee = async (employee) => {
+  if (employee.email) {
+    validateUtil.validateEmail(employee.email);
+  }
+  validateUtil.checkEmpty("Phone number", employee.phoneNumber);
+  employee.phoneNumber = `+84${employee.phoneNumber}`;
+  let foundEmployee;
+
+  await db.runTransaction(async (tx) => {
+    const employeeRef = await db.collection("users").doc(employee.phoneNumber);
+    const employeeSnapshot = await tx.get(employeeRef);
+
+    if (!employeeSnapshot.exists) {
+      throw new Error("User is not found");
+    }
+
+    foundEmployee = employeeSnapshot.data();
+    if (employee.email) {
+      foundEmployee.email = employee.email;
+    }
+    if (employee.address) {
+      foundEmployee.address = employee.address;
+    }
+    if (employee.name) {
+      foundEmployee.name = employee.name;
+      tx.update(db.collection("users").doc(employee.id), {
+        employeeName: foundEmployee.name,
+      });
+    }
+
+    tx.set(
+      db.collection("users").doc(foundEmployee.phoneNumber),
+      foundEmployee,
+    );
+  });
+
+  return { success: true, employee: foundEmployee };
+};
+
+const updateProfile = async (user, userData) => {
+  if (userData.email) {
+    validateUtil.validateEmail(userData.email);
+  }
+
+  let hashedPassword;
+  if (userData.password) {
+    hashedPassword = await passwordUtil.hashPassword(userData.password);
+  }
+
+  let foundUser;
+
+  await db.runTransaction(async (tx) => {
+    const userRef = await db.collection("users").doc(user.phoneNumber);
+    const userSnapshot = await tx.get(userRef);
+
+    if (!userSnapshot.exists) {
+      throw new Error("User is not found");
+    }
+
+    foundUser = userSnapshot.data();
+    if (userData.email) {
+      const foundUsersRef = await db
+        .collection("users")
+        .where("email", "==", userData.email);
+      const foundUsersSnapshot = await tx.get(foundUsersRef);
+
+      if (!foundUsersSnapshot.empty) {
+        throw new Error("Email is already registered");
+      }
+
+      foundUser.email = userData.email;
+    }
+    if (userData.address) {
+      foundUser.address = userData.address;
+    }
+    if (userData.name) {
+      foundUser.name = userData.name;
+    }
+    if (hashedPassword) {
+      foundUser.password = hashedPassword;
+    }
+
+    if (userData.phoneNumber) {
+      const foundUserRef = await db
+        .collection("users")
+        .doc(userData.phoneNumber);
+      const foundUserSnapshot = await tx.get(foundUserRef);
+      if (foundUserSnapshot.exists) {
+        throw new Error("Phone number is already registered");
+      }
+      tx.delete(userRef);
+      foundUser.phoneNumber = `+84${userData.phoneNumber}`;
+    }
+    tx.set(db.collection("users").doc(foundUser.phoneNumber), foundUser);
+  });
+
+  delete foundUser.password;
+
+  return { success: true, user: foundUser };
 };
 
 module.exports = {
@@ -345,4 +450,6 @@ module.exports = {
   deleteEmployee,
   setupAccount,
   loginByUsernamePassword,
+  updateEmployee,
+  updateProfile,
 };

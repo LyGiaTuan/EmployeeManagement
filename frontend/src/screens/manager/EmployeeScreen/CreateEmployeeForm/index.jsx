@@ -3,10 +3,10 @@ import { createPortal } from "react-dom";
 import { Oval } from "react-loader-spinner";
 import { toast } from "react-toastify";
 import { endpoint, getApiUtil } from "../../../../utils/ApiUtil";
-import FormInput from "./components/FormInput";
+import FormInput from "../../../../components/FormInput";
 import styles from "./styles.module.css";
 
-const CreateEmployeeForm = ({ showType, employee, setEmployee }) => {
+const CreateEmployeeForm = ({ employee, setEmployee }) => {
   const [loading, setLoading] = useState(false);
   const fields = [
     {
@@ -18,6 +18,7 @@ const CreateEmployeeForm = ({ showType, employee, setEmployee }) => {
       key: "phoneNumber",
       prefix: "+84",
       type: "number",
+      readOnly: employee?.id,
     },
     {
       label: "Email Address",
@@ -44,7 +45,17 @@ const CreateEmployeeForm = ({ showType, employee, setEmployee }) => {
     }
   };
 
-  const updateEmployee = () => {};
+  const updateEmployee = async () => {
+    try {
+      setLoading(true);
+      await getApiUtil().post(endpoint.MANAGER.UPDATE_EMPLOYEE, employee);
+      toast("Employee updated");
+    } catch (err) {
+      toast.error(`Error: ${err?.response?.data.error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -78,6 +89,7 @@ const CreateEmployeeForm = ({ showType, employee, setEmployee }) => {
             return (
               <FormInput
                 key={index}
+                readOnly={field.readOnly}
                 type={field.type}
                 value={employee[field.key]}
                 label={field.label}
@@ -95,7 +107,13 @@ const CreateEmployeeForm = ({ showType, employee, setEmployee }) => {
             disabled={loading}
             type={"submit"}
           >
-            {loading ? <Oval width={30} height={30} /> : "Create"}
+            {loading ? (
+              <Oval width={30} height={30} />
+            ) : employee?.id ? (
+              "Update"
+            ) : (
+              "Create"
+            )}
           </button>
         </div>
       </form>

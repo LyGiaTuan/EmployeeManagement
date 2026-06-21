@@ -6,7 +6,6 @@
 }
 
 .input {
-  width: 423px;
   height: 72px;
   border-radius: 8px;
   border: 1px solid #bcbcbc;
@@ -14,12 +13,17 @@
   font-size: 25px;
   padding-left: 20px;
   box-sizing: border-box;
+  flex: 1;
 }
 
 .inpuContainer {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.container {
+  width: 423px;
 }
 
 .prefix {

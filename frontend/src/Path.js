@@ -4,7 +4,6 @@ const PATH = {
     VALIDATE: "/manager/validate",
     REGISTER: "/manager/register",
     EMPLOYEEE: "/manager/dashboard/employee",
-    TASK: "/manager/dashboard/task",
   },
   EMPLOYEE: {
     SECURE_ACCOUNT_SETUP: "/employee/secure-account-setup",
@@ -12,7 +11,9 @@ const PATH = {
     TASK: "/employee/dashboard/task",
   },
   COMMON: {
-    MESSAGE: "/message/dashboard",
+    MESSAGE: "/message",
+    EDIT_PROFILE: "/profile",
+    TASK: "/task",
   },
 };
 export default PATH;

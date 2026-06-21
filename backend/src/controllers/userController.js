@@ -34,9 +34,10 @@ const createNewEmployee = async (req, res) => {
 const getEmployees = async (req, res) => {
   try {
     const body = req.body;
-    data = await userService.getEmployees(body.limit, body.offset);
+    data = await userService.getEmployees(body.offset, body.emailKeyword);
     res.json(data);
   } catch (ex) {
+    console.log(ex);
     res.status(400).json({ error: ex.message });
   }
 };
@@ -72,6 +73,27 @@ const loginByUsernamePassword = async (req, res) => {
   }
 };
 
+const updateEmployee = async (req, res) => {
+  try {
+    const body = req.body;
+    data = await userService.updateEmployee(body);
+    res.json(data);
+  } catch (ex) {
+    res.status(400).json({ error: ex.message });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const body = req.body;
+    const user = req.user;
+    data = await userService.updateProfile(user, body);
+    res.json(data);
+  } catch (ex) {
+    res.status(400).json({ error: ex.message });
+  }
+};
+
 module.exports = {
   createNewAccessCode,
   validateAccessCode,
@@ -80,4 +102,6 @@ module.exports = {
   deleteEmployee,
   setupAccount,
   loginByUsernamePassword,
+  updateEmployee,
+  updateProfile,
 };

@@ -29,4 +29,26 @@ const managerFilter = (req, res, next) => {
   next();
 };
 
-module.exports = { managerFilter };
+const authenticatedFilter = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  const token = authorization?.split(" ")?.[1];
+
+  if (!token) {
+    res.status(401).json({ error: "token is required" });
+    return;
+  }
+
+  let tokenData;
+  try {
+    tokenData = securityUtil.verifyToken(token);
+  } catch (ex) {
+    res.status(401).json({ error: ex.message });
+    return;
+  }
+
+  req.user = tokenData;
+
+  next();
+};
+
+module.exports = { managerFilter, authenticatedFilter };

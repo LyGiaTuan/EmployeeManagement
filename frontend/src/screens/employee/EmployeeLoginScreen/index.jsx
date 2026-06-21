@@ -27,6 +27,7 @@ const EmployeeLoginScreen = () => {
     try {
       const res = await getApiUtil().post(endpoint.EMPLOYEE.LOGIN, data);
       setToken(res.data.token);
+      console.log(res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
       socketClient.auth = { token: res.data.token };
       socketClient.connect();
