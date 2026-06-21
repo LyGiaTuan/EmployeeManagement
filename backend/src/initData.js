@@ -1,8 +1,8 @@
-const db = require("./firebaseConfig");
+const db = require("./config/firebaseConfig");
 const crypto = require("crypto");
-const ROLE = require("../enums/role");
-const passwordUtil = require("../utils/passwordUtil");
-const validateUtil = require("../utils/validateUtil");
+const ROLE = require("./enums/role");
+const passwordUtil = require("./utils/passwordUtil");
+const validateUtil = require("./utils/validateUtil");
 
 const initManager = async () => {
   const hashedPassword = await passwordUtil.hashPassword(

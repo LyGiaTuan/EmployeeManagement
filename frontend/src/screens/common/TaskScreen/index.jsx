@@ -12,11 +12,9 @@ const TaskScreen = () => {
   const [tasks, setTasks] = useState([]);
   const [emailKeyword, setEmailKeyword] = useState("");
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const getEmployees = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await getApiUtil().post(endpoint.MANAGER.GET_EMPLOYEES, {
         offset: offset,
         emailKeyword,
@@ -24,8 +22,6 @@ const TaskScreen = () => {
       setEmployees(res.data.employees);
     } catch (ex) {
       toast.error(`Error: ${ex?.response?.data.error}`);
-    } finally {
-      setLoading(false);
     }
   }, [emailKeyword, offset]);
 
@@ -40,7 +36,8 @@ const TaskScreen = () => {
 
   const createTask = async () => {
     try {
-      const res = await getApiUtil().post(endpoint.TASK.CREATE_TASK, task);
+      await getApiUtil().post(endpoint.TASK.CREATE_TASK, task);
+      toast("Create success");
     } catch (ex) {
       toast.error(`Error: ${ex?.response?.data.error}`);
     }
@@ -98,7 +95,7 @@ const TaskScreen = () => {
   }));
 
   useEffect(() => {
-    if (user.role == ROLE.MANAGER) {
+    if (user?.role === ROLE.MANAGER) {
       const id = setTimeout(() => {
         getEmployees();
       });
@@ -106,7 +103,7 @@ const TaskScreen = () => {
         clearTimeout(id);
       };
     }
-  }, [getEmployees]);
+  }, [getEmployees, user?.role]);
 
   useEffect(() => {
     getTasks();
@@ -175,6 +172,26 @@ const TaskScreen = () => {
             />
             <div className={styles.employeeTableContainer}>
               <AppTable labels={labels} keys={keys} list={lists} />
+            </div>
+            <div className={styles.navigationButtonsContainer}>
+              <button
+                className={`${styles.baseButton} ${styles.navigationButton}`}
+                disabled={!offset}
+                onClick={() => {
+                  setOffset(offset - 10);
+                }}
+              >
+                &larr;
+              </button>
+              <button
+                className={`${styles.baseButton} ${styles.navigationButton}`}
+                disabled={!employees.length}
+                onClick={() => {
+                  setOffset(offset + 10);
+                }}
+              >
+                &rarr;
+              </button>
             </div>
           </div>
         </div>

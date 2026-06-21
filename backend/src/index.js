@@ -6,7 +6,7 @@ const taskRouter = require("./routers/taskRouter")
 const bodyConfig = require("./config/bodyConfig");
 const corsConfig = require("./config/corsConfig");
 const socketConfig = require("./config/socketConfig");
-const initData = require("./config/initData");
+const initData = require("./initData");
 
 bodyConfig.configureApp(app);
 corsConfig.configureApp(app);
