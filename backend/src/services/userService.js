@@ -162,7 +162,7 @@ const createNewEmployee = async (employee, manager) => {
     employee.email,
     "Employee Management",
     "Your account has been created",
-    `Your account username is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}"`,
+    `Your account email is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}"`,
   );
 
   return { success: true, employeeId: employee.id };
