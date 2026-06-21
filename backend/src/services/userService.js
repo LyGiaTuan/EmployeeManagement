@@ -33,7 +33,7 @@ const createNewAccessCode = async (body) => {
     });
   });
 
-  // smsService.sendSMS(phoneNumber, code);
+  smsService.sendSMS(phoneNumber, code);
   return code;
 };
 
