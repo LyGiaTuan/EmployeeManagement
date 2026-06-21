@@ -22,7 +22,7 @@ export const endpoint = {
   },
 };
 
-const baseUrl = "http://localhost:5000/";
+const baseUrl = process.env.REACT_APP_BE_URL;
 let apiUtil = axios.create({
   baseURL: baseUrl,
 });

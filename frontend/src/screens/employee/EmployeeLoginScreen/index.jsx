@@ -31,7 +31,7 @@ const EmployeeLoginScreen = () => {
       localStorage.setItem("user", JSON.stringify(res.data));
       socketClient.auth = { token: res.data.token };
       socketClient.connect();
-      navigate(PATH.EMPLOYEE.TASK);
+      navigate(PATH.COMMON.TASK);
     } catch (ex) {
       toast.error(`Error: ${ex?.response?.data.error}`);
     }

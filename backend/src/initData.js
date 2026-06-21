@@ -32,4 +32,4 @@ const initManager = async () => {
   });
 };
 
-module.exports = { initManager };
+initManager()

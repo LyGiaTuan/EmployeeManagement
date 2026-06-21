@@ -1,70 +1,55 @@
-# Getting Started with Create React App
+A employee management application include: backend project, frontend project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+backend project:
+- structure:
+ - src:
+  - config: config which connect to library, database
+  - controllers: response to client
+  - enums: contain the value that is never change
+  - filters: contains or middleware
+  - routers: include route 
+  - services: include service which handle logic of business
+  - utils: the code is used common
+  - index: the main file which start service
+  - initData: the file init data of manager
+- .env.example: evironment file example
 
-## Available Scripts
 
-In the project directory, you can run:
+ - how to start:
+  - first, create .env in root project with fields (like .env.example):
+  - TWILIO_ACCOUNT_SID:  account twilio account sid (get it from twilio)
+  - TWILIO_AUTH_TOKEN:  account twilio account auth token (get it from twilio)
+  - TWILIO_PHONE_NUMBER: account which is bought on twilio page 
+  - MANAGER_PHONE: manager's phone 
+  - MANAGER_NAME: manager's name
+  - MANAGER_EMAIL: manager's email
+  - MANAGER_ADDRESS: manager's address
+  - MANAGER_USERNAME: manager's username 
+  - MANAGER_PASSWORD: manager's password
+  - JWT_SECRET: secret to sign and verfiy jwt token
+  - MAIL_USERNAME: email which is used to send mail to employee (in this case email must be gmail)
+  - MAIL_PASSWORD: password which service can use to login email (app password)
+  - FE_URL: frontend url
+  - PASSWORD_SALT: the salt which password bcrypt use to hash password
+ - second, put the google account service key to connect to firebase to root project, and rename it to firebaseKey.json
+ - third, run npm i to install packages the project need
+ - fourth, run npm run init to init data of manager
+ - final, run npm start to start the service
 
-### `npm start`
+frontend project:
+- structure:
+ - src:
+  - assets: svgs used in project
+  - components: the jsx components used in many places in project
+  - contexts: the contexts provide data (createContext)
+  - providers: the wrapper that provide data for whole project
+  - screens: the jsx components which is page
+   - components in screens: the jsx components use in screens
+  - utils: the js code used in many place in project
+ - .env.example: evironment file example
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+ - how to start:
+  - first, create .env with the field (like .env.example):
+   - REACT_APP_BE_URL: backend url
+  - second, run npm i to install packages
+  - final, run npm start
