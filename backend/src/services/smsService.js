@@ -2,7 +2,7 @@ const smsClient = require("../config/smsConfig");
 
 const sendSMS = async (receivedPhoneNumber) => {
   try {
-    await smsClient.sendSMS(receivedPhoneNumber);
+    const res = await smsClient.sendSMS(receivedPhoneNumber);
   } catch (error) {
     console.error("❌ Lỗi khi gửi SMS:", error.message, error.code);
   }
