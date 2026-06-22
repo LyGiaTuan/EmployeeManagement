@@ -1,11 +1,18 @@
 const smsClient = require("../config/smsConfig");
 
-const sendSMS = async (receivedPhoneNumber, message) => {
+const sendSMS = async (receivedPhoneNumber) => {
   try {
-    await smsClient.sendSMS(receivedPhoneNumber, message);
+    await smsClient.sendSMS(receivedPhoneNumber);
   } catch (error) {
     console.error("❌ Lỗi khi gửi SMS:", error.message, error.code);
   }
 };
 
-module.exports = { sendSMS };
+const validateSMSCode = async (receivedPhoneNumber, code) => {
+  const res = await smsClient.validateSMS(receivedPhoneNumber, code);
+  if (!res.valid) {
+    throw new Error("Code doesn't match");
+  }
+};
+
+module.exports = { sendSMS, validateSMSCode };

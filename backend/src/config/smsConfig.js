@@ -5,12 +5,22 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN,
 );
 
-const sendSMS = async (receivedPhoneNumber, message) => {
-  const msg = await twilioClient.messages.create({
-    body: message,
-    from: process.env.TWILIO_PHONE_NUMBER,
-    to: receivedPhoneNumber,
-  });
+const sendSMS = async (phoneNumber) => {
+  const msg = await twilioClient.verify.v2
+    .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+    .verifications.create({
+      to: phoneNumber,
+      channel: "sms",
+    });
 };
 
-module.exports = { sendSMS };
+const validateSMS = async (phoneNumber, code) => {
+  return await twilioClient.verify.v2
+    .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+    .verificationChecks.create({
+      to: phoneNumber,
+      code,
+    });
+};
+
+module.exports = { sendSMS, validateSMS };

@@ -3,8 +3,8 @@ const userService = require("../services/userService");
 const createNewAccessCode = async (req, res) => {
   try {
     const body = req.body;
-    const code = await userService.createNewAccessCode(body);
-    res.json({ code: code });
+    const data = await userService.createNewAccessCode(body);
+    res.json(data);
   } catch (ex) {
     res.status(400).json({ error: ex.message });
   }

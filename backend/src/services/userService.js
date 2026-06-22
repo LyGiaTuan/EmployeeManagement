@@ -15,10 +15,6 @@ const createNewAccessCode = async (body) => {
   validateUtil.checkEmpty("Phone number", phoneNumber);
   phoneNumber = `+84${phoneNumber}`;
 
-  const code = Math.round(Math.random() * 1000000)
-    .toString()
-    .padStart(6, "0");
-
   await db.runTransaction(async (tx) => {
     const managerSnapshot = await tx.get(
       db.collection("users").doc(phoneNumber),
@@ -27,14 +23,10 @@ const createNewAccessCode = async (body) => {
     if (!managerSnapshot.exists) {
       throw new Error("Manager not found");
     }
-
-    tx.set(db.collection("otps").doc(phoneNumber), {
-      code: code,
-    });
   });
 
-  smsService.sendSMS(phoneNumber, code);
-  return code;
+  await smsService.sendSMS(phoneNumber);
+  return { success: true };
 };
 
 const validateAccessCode = async (body) => {
@@ -46,30 +38,13 @@ const validateAccessCode = async (body) => {
   phoneNumber = `+84${body.phoneNumber}`;
   let manager;
   let token = "";
+  await smsService.validateSMSCode(phoneNumber, code);
   await db.runTransaction(async (tx) => {
-    const otpRef = db.collection("otps").doc(phoneNumber);
-    const otpSnapshot = await tx.get(otpRef);
-    if (!otpSnapshot.exists) {
-      throw new Error("Code doesn't exist");
-    }
-
-    const otp = otpSnapshot.data();
-
-    if (!otp.code) {
-      throw new Error("Code doesn't exist");
-    }
-
-    if (otp.code != code) {
-      throw new Error("Code doesn't match");
-    }
-
     const managerSnapshot = await tx.get(
       db.collection("users").doc(phoneNumber),
     );
+
     manager = managerSnapshot.data();
-
-    tx.set(db.collection("otps").doc(phoneNumber), { code: "" });
-
     token = securityUtil.generateToken(
       manager.id,
       manager.email,
