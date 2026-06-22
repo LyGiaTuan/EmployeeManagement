@@ -19,7 +19,7 @@ backend project:
   - first, create .env in root project with fields (like .env.example):
   - TWILIO_ACCOUNT_SID:  account twilio account sid (get it from twilio)
   - TWILIO_AUTH_TOKEN:  account twilio account auth token (get it from twilio)
-  - TWILIO_PHONE_NUMBER: account which is bought on twilio page 
+  - TWILIO_VERIFY_SERVICE_SID: service id which is created in twilio 
   - MANAGER_PHONE: manager's phone 
   - MANAGER_NAME: manager's name
   - MANAGER_EMAIL: manager's email
