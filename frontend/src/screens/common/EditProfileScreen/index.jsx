@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Oval } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -17,6 +17,7 @@ const EditProfileScreen = () => {
     ...user,
     phoneNumber: user?.phoneNumber.slice(3),
   });
+  const submitUserData = useRef({});
   const fields = [
     {
       label: "Username",
@@ -43,7 +44,7 @@ const EditProfileScreen = () => {
       key: "address",
     },
     {
-      label: "Status",
+      label: "Active",
       key: "active",
       readOnly: true,
     },
@@ -54,14 +55,24 @@ const EditProfileScreen = () => {
     },
     {
       label: "Reenter password",
-      key: "ReenterPassword",
+      key: "reenterPassword",
       type: "password",
     },
   ];
   const updateUser = async () => {
     try {
+      if (
+        submitUserData.current.password !==
+        submitUserData.current.reenterPassword
+      ) {
+        toast.error(`Error: Passwords is not match`);
+        return;
+      }
       setLoading(true);
-      await getApiUtil().post(endpoint.COMMON.UPDATE_PROFILE, userData);
+      await getApiUtil().post(
+        endpoint.COMMON.UPDATE_PROFILE,
+        submitUserData.current,
+      );
       localStorage.clear();
       clearToken();
       socketClient.auth = { token: "" };
@@ -94,6 +105,10 @@ const EditProfileScreen = () => {
             prefix={field.prefix}
             setValue={(value) => {
               setUserData({ ...userData, [field.key]: value });
+              submitUserData.current = {
+                ...submitUserData.current,
+                [field.key]: value,
+              };
             }}
           />
         );
