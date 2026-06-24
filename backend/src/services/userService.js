@@ -401,7 +401,7 @@ const updateProfile = async (user, userData) => {
     if (userData.phoneNumber) {
       const foundUserRef = await db
         .collection("users")
-        .doc(userData.phoneNumber);
+        .doc(`+84${userData.phoneNumber}`);
       const foundUserSnapshot = await tx.get(foundUserRef);
       if (foundUserSnapshot.exists) {
         throw new Error("Phone number is already registered");

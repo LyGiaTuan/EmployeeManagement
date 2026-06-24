@@ -12,7 +12,7 @@ backend project:
   - utils: the code is used common
   - index: the main file which start service
   - initData: the file init data of manager
-- .env.example: evironment file example
+  - .env.example: evironment file example
 
 
  - how to start:

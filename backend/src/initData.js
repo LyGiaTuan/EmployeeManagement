@@ -1,3 +1,4 @@
+require("dotenv").config()
 const db = require("./config/firebaseConfig");
 const crypto = require("crypto");
 const ROLE = require("./enums/role");
