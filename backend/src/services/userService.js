@@ -99,7 +99,7 @@ const createNewEmployee = async (employee, manager) => {
 
     const usersCount = usersCountSnapshot.exists
       ? usersCountSnapshot.data()
-      : 0;
+      : { value: 0 };
 
     employee = {
       name: employee.name.trim(),
@@ -137,7 +137,7 @@ const createNewEmployee = async (employee, manager) => {
     employee.email,
     "Employee Management",
     "Your account has been created",
-    `Your account email is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}"`,
+    `Your account email is ${employee.email}, click this link to complete registeration: ${process.env.FE_URL}/employee/secure-account-setup?activateKey=${employee.activateKey}`,
   );
 
   return { success: true, employeeId: employee.id };
@@ -170,7 +170,7 @@ const getEmployees = async (offset = 0, emailKeyword) => {
       db.collection("employeesCount").doc("primary"),
     );
 
-    employeesCount = employeesCountSnapshot.data();
+    employeesCount = employeesCountSnapshot.data() || { value: 0 };
   });
   return { employees, employeesCount: employeesCount.value };
 };
