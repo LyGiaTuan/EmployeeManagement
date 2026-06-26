@@ -333,17 +333,12 @@ const updateEmployee = async (employee) => {
     }
 
     foundEmployee = employeeSnapshot.data();
-    if (employee.email) {
-      foundEmployee.email = employee.email;
-    }
     if (employee.address) {
       foundEmployee.address = employee.address;
     }
+    
     if (employee.name) {
       foundEmployee.name = employee.name;
-      tx.update(db.collection("users").doc(employee.id), {
-        employeeName: foundEmployee.name,
-      });
     }
 
     tx.set(

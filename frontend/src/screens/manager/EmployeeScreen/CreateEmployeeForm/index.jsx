@@ -24,6 +24,7 @@ const CreateEmployeeForm = ({ employee, setEmployee }) => {
       label: "Email Address",
       key: "email",
       type: "email",
+      readOnly: employee?.id,
     },
     {
       label: "Address",
