@@ -43,7 +43,7 @@ const TaskScreen = () => {
     }
   };
 
-  const labels = ["Email", "Name", "Button"];
+  const labels = ["Name", "Email", "Button"];
   const keys = ["name", "email", "button"];
   const lists = employees?.map((employee, index) => ({
     id: index,
